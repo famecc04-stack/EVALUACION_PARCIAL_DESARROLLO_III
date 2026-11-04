@@ -1,0 +1,272 @@
+<div class="container-fluid px-4 py-4">
+  <div class="row g-4">
+    <div class="col-12 col-xl-4">
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white py-3 px-4 border-bottom">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h5 class="fw-bold text-dark mb-0">
+              <i class="bi bi-search text-primary me-2"></i> Pacientes Registrados
+            </h5>
+            <span class="badge bg-primary-subtle text-primary">{{ mascotasFiltradas.length }} Total</span>
+          </div>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0">
+              <i class="bi bi-funnel text-muted"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control border-start-0 bg-light"
+              placeholder="Buscar por nombre, raza o especie..."
+              [(ngModel)]="terminoBusqueda"
+            />
+          </div>
+        </div>
+
+        <div class="card-body p-3 lista-pacientes-scroll" style="max-height: 480px; overflow-y: auto;">
+          <div class="d-flex flex-column gap-2" *ngIf="mascotasFiltradas.length > 0; else sinMascotas">
+            <div
+              *ngFor="let m of mascotasFiltradas"
+              class="p-3 rounded-3 border transition-all cursor-pointer"
+              [class.border-primary]="mascotaSeleccionada?.id === m.id"
+              [class.bg-primary-subtle]="mascotaSeleccionada?.id === m.id"
+              [class.bg-white]="mascotaSeleccionada?.id !== m.id"
+              (click)="seleccionarMascota(m.id)"
+            >
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="fs-4" [class]="m.especie | especieBadge:'icono'"></i>
+                  <div>
+                    <h6 class="mb-0 fw-bold text-dark">{{ m.nombre }}</h6>
+                    <small class="text-muted">{{ m.raza }} • {{ m.pesoKg }} kg</small>
+                  </div>
+                </div>
+                <span [class]="m.especie | especieBadge:'badge'">
+                  {{ m.especie }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #sinMascotas>
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-emoji-neutral fs-2"></i>
+              <p class="small mt-2 mb-0">No se encontraron mascotas con ese criterio.</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-4" *ngIf="mascotaSeleccionada">
+        <div class="card-header bg-primary text-white py-3 px-4 rounded-top-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <h6 class="mb-0 fw-bold">
+              <i class="bi bi-shield-check me-2"></i> Evaluación POO & Fisiología
+            </h6>
+            <span class="badge bg-white text-primary">POO Activa</span>
+          </div>
+        </div>
+        <div class="card-body p-4">
+          <div class="mb-3">
+            <label class="text-muted small fw-semibold">Ficha Clínica Generada (Polimorfismo)</label>
+            <p class="small p-2 bg-light rounded-3 text-secondary mb-0 border">
+              {{ mascotaSeleccionada.obtenerFichaClinica() }}
+            </p>
+          </div>
+
+          <div class="mb-3">
+            <label class="text-muted small fw-semibold">Cálculo de Dosis Base (10mg/kg c/ Factor Especie)</label>
+            <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded-3 border">
+              <span class="small">Dosis Metabolizada:</span>
+              <strong class="text-primary">{{ mascotaSeleccionada.calcularDosisMedicamento(10) }} mg</strong>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="text-muted small fw-semibold">Riesgo Quirúrgico / Anestésico</label>
+            <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded-3 border">
+              <span class="small">Clasificación:</span>
+              <span
+                class="badge"
+                [ngClass]="{
+                  'bg-success': mascotaSeleccionada.clasificarRiesgoAnestesico() === 'BAJO',
+                  'bg-info text-dark': mascotaSeleccionada.clasificarRiesgoAnestesico() === 'MODERADO',
+                  'bg-warning text-dark': mascotaSeleccionada.clasificarRiesgoAnestesico() === 'ALTO',
+                  'bg-danger': mascotaSeleccionada.clasificarRiesgoAnestesico() === 'CRITICO'
+                }"
+              >
+                {{ mascotaSeleccionada.clasificarRiesgoAnestesico() }}
+              </span>
+            </div>
+          </div>
+
+          <div class="mb-2" *ngIf="mascotaSeleccionada.alergias.length > 0">
+            <label class="text-muted small fw-semibold">Alergias Detectadas</label>
+            <div class="d-flex flex-wrap gap-1">
+              <span class="badge bg-danger-subtle text-danger border border-danger" *ngFor="let a of mascotaSeleccionada.alergias">
+                <i class="bi bi-exclamation-circle me-1"></i> {{ a }}
+              </span>
+            </div>
+          </div>
+
+          <div *ngIf="mascotaSeleccionada.condicionesPreexistentes.length > 0">
+            <label class="text-muted small fw-semibold">Preexistencias</label>
+            <div class="d-flex flex-wrap gap-1">
+              <span class="badge bg-warning-subtle text-dark border border-warning" *ngFor="let c of mascotaSeleccionada.condicionesPreexistentes">
+                {{ c }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-8">
+      <div class="card border-0 shadow-sm rounded-4 mb-4" *ngIf="mascotaSeleccionada">
+        <div class="card-body p-4">
+          <div class="row align-items-center g-3">
+            <div class="col-md-7">
+              <div class="d-flex align-items-center gap-3">
+                <div class="avatar-lg rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center p-3">
+                  <i class="fs-1" [class]="mascotaSeleccionada.especie | especieBadge:'icono'"></i>
+                </div>
+                <div>
+                  <h3 class="fw-bold mb-0 text-dark">{{ mascotaSeleccionada.nombre }}</h3>
+                  <div class="text-muted small">
+                    {{ mascotaSeleccionada.raza }} • {{ mascotaSeleccionada.calcularEdad().texto }} • {{ mascotaSeleccionada.sexo }}
+                  </div>
+                  <div class="mt-1" *ngIf="duenoSeleccionado">
+                    <span class="badge bg-light text-secondary border">
+                      <i class="bi bi-person me-1"></i> Dueño: {{ duenoSeleccionado.nombreCompleto }} ({{ duenoSeleccionado.telefono }})
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-5 text-md-end" *ngIf="!puedeRegistrarAtencion">
+              <span class="badge bg-secondary-subtle text-secondary border px-3 py-2">
+                <i class="bi bi-eye me-1"></i> Modo consulta (solo lectura)
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <app-tabla-historial
+        [registros]="registrosHistorial"
+        [mascota]="mascotaSeleccionada"
+        [permitirRegistro]="puedeRegistrarAtencion"
+        (registrarNuevaAtencion)="abrirModalNuevaAtencion()"
+      ></app-tabla-historial>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade show d-block" *ngIf="modalNuevaAtencionAbierto" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header bg-primary text-white py-3 px-4 rounded-top-4">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-journal-plus me-2"></i> Registrar Atención Médica para {{ mascotaSeleccionada?.nombre }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModalNuevaAtencion()" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-muted">Tipo de Acto Médico *</label>
+            <select class="form-select" [(ngModel)]="nuevoTipoRegistro">
+              <option value="CONSULTA">Consulta Médica General</option>
+              <option value="VACUNA">Aplicación de Vacuna</option>
+              <option value="PROCEDIMIENTO">Procedimiento Menor / Curación</option>
+              <option value="CIRUGIA">Intervención Quirúrgica</option>
+              <option value="EXAMEN_LABORATORIO">Examen de Laboratorio</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-muted">Peso Físico Registrado (kg) *</label>
+            <input type="number" step="0.1" class="form-control" [(ngModel)]="nuevoPeso" (ngModelChange)="calcularDosisSugerida()" />
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-muted">Anamnesis / Motivo de Consulta *</label>
+            <textarea
+              class="form-control"
+              rows="2"
+              placeholder="Describa síntomas, tiempo de evolución y comentarios del propietario..."
+              [(ngModel)]="nuevaAnamnesis"
+            ></textarea>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-muted">Diagnóstico Presuntivo / Definitivo *</label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Ej. Gastroenteritis bacteriana aguda, Traumatismo leve..."
+              [(ngModel)]="nuevoDiagnostico"
+            />
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-muted">Constantes Fisiológicas</label>
+            <div class="row g-2">
+              <div class="col-4">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">Temp (°C)</span>
+                  <input type="number" step="0.1" class="form-control" [(ngModel)]="nuevaTemperatura" />
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">FC (bpm)</span>
+                  <input type="number" class="form-control" [(ngModel)]="nuevaFrecuenciaC" />
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">FR (rpm)</span>
+                  <input type="number" class="form-control" [(ngModel)]="nuevaFrecuenciaR" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-8">
+            <label class="form-label small fw-semibold text-muted">Medicamento Prescrito (Opcional)</label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Ej. Amoxicilina + Ácido Clavulánico"
+              [(ngModel)]="nuevoMedicamento"
+            />
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold text-muted">Dosis Calculada (mg)</label>
+            <input type="number" class="form-control" [(ngModel)]="nuevaDosisMg" />
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-semibold text-muted">Observaciones / Indicaciones</label>
+            <textarea
+              class="form-control"
+              rows="2"
+              placeholder="Pautas para el propietario, próxima fecha de control..."
+              [(ngModel)]="nuevasObservaciones"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer bg-light py-2 px-4 rounded-bottom-4">
+        <button type="button" class="btn btn-secondary rounded-pill px-4" (click)="cerrarModalNuevaAtencion()">Cancelar</button>
+        <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold" (click)="guardarNuevaAtencion()">
+          <i class="bi bi-save me-1"></i> Guardar en Historial
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,135 @@
+<form [formGroup]="formularioCita" (ngSubmit)="emitirGuardado()" novalidate>
+  <div class="row g-3">
+    <div class="col-12 col-md-6">
+      <label class="form-label small fw-semibold text-muted">Paciente / Mascota *</label>
+      <select
+        class="form-select"
+        formControlName="mascotaId"
+        (change)="onCambioMascota(formularioCita.get('mascotaId')?.value)"
+        [class.is-invalid]="formularioCita.get('mascotaId')?.invalid && formularioCita.get('mascotaId')?.touched"
+      >
+        <option value="" disabled>Seleccione un paciente registrado...</option>
+        <option *ngFor="let m of mascotas" [value]="m.id">
+          {{ m.nombre }} ({{ m.especie }} - {{ m.raza }})
+        </option>
+      </select>
+      <div class="invalid-feedback">Debe seleccionar una mascota.</div>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <label class="form-label small fw-semibold text-muted">Propietario Asociado</label>
+      <input
+        type="text"
+        class="form-control bg-light"
+        formControlName="duenoNombre"
+        readonly
+      />
+    </div>
+
+    <div class="col-12 col-md-4">
+      <label class="form-label small fw-semibold text-muted">Médico Veterinario *</label>
+      <select
+        class="form-select"
+        formControlName="veterinarioId"
+        [class.is-invalid]="formularioCita.get('veterinarioId')?.invalid && formularioCita.get('veterinarioId')?.touched"
+      >
+        <option value="" disabled>Seleccione un médico...</option>
+        <option *ngFor="let v of veterinarios" [value]="v.id">
+          {{ v.nombreProfesional }} — {{ v.especialidad }}
+        </option>
+      </select>
+      <div class="invalid-feedback">Debe seleccionar un médico veterinario.</div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <label class="form-label small fw-semibold text-muted">Fecha de Consulta *</label>
+      <input
+        type="date"
+        class="form-control"
+        formControlName="fecha"
+        [min]="fechaMinima"
+        [class.is-invalid]="fechaControl.invalid && fechaControl.touched"
+      />
+      <div class="invalid-feedback">
+        <span *ngIf="fechaControl.errors?.['required']">La fecha es obligatoria.</span>
+        <span *ngIf="fechaControl.errors?.['fechaPasada']">No se pueden agendar citas en fechas pasadas.</span>
+        <span *ngIf="fechaControl.errors?.['diaNoLaborable']">La clínica no atiende los domingos.</span>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <label class="form-label small fw-semibold text-muted">Horario Disponible *</label>
+      <select
+        class="form-select"
+        formControlName="hora"
+        [class.is-invalid]="(formularioCita.get('hora')?.invalid && formularioCita.get('hora')?.touched) || sinHorarios"
+      >
+        <option value="" disabled>{{ sinHorarios ? 'Sin turnos libres' : 'Seleccione hora...' }}</option>
+        <option *ngFor="let h of horariosDisponibles" [value]="h">{{ h }} hrs</option>
+      </select>
+      <div class="invalid-feedback" *ngIf="sinHorarios">
+        El médico no tiene turnos libres en esta fecha. Elija otra fecha u otro médico.
+      </div>
+      <div class="invalid-feedback" *ngIf="!sinHorarios">Seleccione un horario.</div>
+      <div class="form-text" *ngIf="!sinHorarios && horariosDisponibles.length > 0">
+        {{ horariosDisponibles.length }} turnos libres para este médico.
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <label class="form-label small fw-semibold text-muted">Motivo de la Cita *</label>
+      <select class="form-select" formControlName="motivo">
+        <option *ngFor="let mot of motivosDisponibles" [value]="mot">{{ mot }}</option>
+      </select>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <label class="form-label small fw-semibold text-muted">Nivel de Prioridad / Triage *</label>
+      <select class="form-select" formControlName="prioridad">
+        <option *ngFor="let p of prioridadesDisponibles" [value]="p">{{ p }}</option>
+      </select>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label small fw-semibold text-muted">Descripción de Síntomas o Solicitud *</label>
+      <textarea
+        class="form-control"
+        rows="3"
+        formControlName="descripcionSintomas"
+        placeholder="Indique motivo detallado o sintomatología observada por el dueño..."
+        [class.is-invalid]="formularioCita.get('descripcionSintomas')?.invalid && formularioCita.get('descripcionSintomas')?.touched"
+      ></textarea>
+      <div class="invalid-feedback">Debe ingresar una descripción (mínimo 5 caracteres).</div>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <label class="form-label small fw-semibold text-muted">Costo Estimado (S/)</label>
+      <div class="input-group">
+        <span class="input-group-text">S/</span>
+        <input type="number" step="5" class="form-control" formControlName="costoEstimado" />
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <label class="form-label small fw-semibold text-muted">Duración Estimada (minutos)</label>
+      <div class="input-group">
+        <input type="number" step="15" class="form-control" formControlName="duracionMinutos" />
+        <span class="input-group-text">min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-danger d-flex align-items-center gap-2 mt-3 mb-0" role="alert" *ngIf="errorServidor">
+    <i class="bi bi-exclamation-octagon-fill"></i>
+    <span>{{ errorServidor }}</span>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+    <button type="button" class="btn btn-secondary rounded-pill px-4" (click)="emitirCancelacion()">
+      Cancelar
+    </button>
+    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
+      <i class="bi bi-calendar-check me-1"></i> Agendar Cita
+    </button>
+  </div>
+</form>

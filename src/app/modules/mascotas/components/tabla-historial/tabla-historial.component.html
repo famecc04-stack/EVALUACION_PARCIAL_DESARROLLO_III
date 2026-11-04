@@ -1,0 +1,209 @@
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+  <div class="card-header bg-white py-3 px-4 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div>
+      <h5 class="fw-bold mb-0 text-dark">
+        <i class="bi bi-clock-history text-primary me-2"></i> Evolución y Atenciones Médicas
+      </h5>
+      <small class="text-muted" *ngIf="mascota">
+        Historial clínico oficial de <strong>{{ mascota.nombre }}</strong>
+      </small>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <select class="form-select form-select-sm border-secondary-subtle" [(ngModel)]="filtroTipo">
+        <option value="TODOS">Todos los Registros</option>
+        <option value="CONSULTA">Consultas Médicas</option>
+        <option value="VACUNA">Inmunizaciones</option>
+        <option value="PROCEDIMIENTO">Procedimientos</option>
+        <option value="CIRUGIA">Cirugías</option>
+        <option value="EXAMEN_LABORATORIO">Laboratorio</option>
+      </select>
+
+      <button
+        *ngIf="permitirRegistro && mascota"
+        type="button"
+        class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold text-nowrap"
+        (click)="emitirNuevaAtencion()"
+      >
+        <i class="bi bi-clipboard2-plus me-1"></i> Registrar Nueva Atención
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive" *ngIf="registrosFiltrados.length > 0; else sinRegistros">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Fecha y Hora</th>
+            <th>Tipo</th>
+            <th>Médico Veterinario</th>
+            <th>Diagnóstico / Motivo</th>
+            <th>Constantes Vitales</th>
+            <th>Tratamiento / Vacunas</th>
+            <th class="text-end pe-4">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let reg of registrosFiltrados">
+            <td class="ps-4 fw-semibold text-nowrap">
+              {{ reg.fechaAtencion | date:'dd/MM/yyyy HH:mm' }}
+            </td>
+            <td>
+              <span
+                class="badge"
+                [ngClass]="{
+                  'bg-primary': reg.tipoRegistro === 'CONSULTA',
+                  'bg-success': reg.tipoRegistro === 'VACUNA',
+                  'bg-danger': reg.tipoRegistro === 'CIRUGIA',
+                  'bg-info text-dark': reg.tipoRegistro === 'PROCEDIMIENTO',
+                  'bg-warning text-dark': reg.tipoRegistro === 'EXAMEN_LABORATORIO'
+                }"
+              >
+                {{ reg.tipoRegistro }}
+              </span>
+            </td>
+            <td>
+              <span class="small fw-semibold text-secondary">{{ reg.veterinarioNombre }}</span>
+            </td>
+            <td>
+              <div class="fw-semibold text-dark text-truncate" style="max-width: 250px;">
+                {{ reg.diagnostico }}
+              </div>
+              <small class="text-muted d-block text-truncate" style="max-width: 250px;">
+                {{ reg.anamnesis }}
+              </small>
+            </td>
+            <td>
+              <div class="small text-muted lh-sm">
+                <div><i class="bi bi-thermometer-half text-danger"></i> {{ reg.examenFisico.temperaturaCorporal }}°C</div>
+                <div><i class="bi bi-heart-pulse text-primary"></i> {{ reg.examenFisico.frecuenciaCardiaca }} bpm | {{ reg.examenFisico.pesoKg }} kg</div>
+              </div>
+            </td>
+            <td>
+              <div *ngIf="reg.tratamientos && reg.tratamientos.length > 0">
+                <span class="badge bg-secondary-subtle text-secondary me-1" *ngFor="let t of reg.tratamientos">
+                  {{ t.medicamento }} ({{ t.dosisMg }}mg)
+                </span>
+              </div>
+              <div *ngIf="reg.vacunasAplicadas && reg.vacunasAplicadas.length > 0">
+                <span class="badge bg-success-subtle text-success me-1" *ngFor="let v of reg.vacunasAplicadas">
+                  {{ v.nombreVacuna }} (Lote: {{ v.lote }})
+                </span>
+              </div>
+              <span *ngIf="(!reg.tratamientos || reg.tratamientos.length === 0) && (!reg.vacunasAplicadas || reg.vacunasAplicadas.length === 0)" class="text-muted small">
+                N/A
+              </span>
+            </td>
+            <td class="text-end pe-4">
+              <button
+                type="button"
+                class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                (click)="seleccionarDetalle(reg)"
+              >
+                <i class="bi bi-eye me-1"></i> Ficha
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #sinRegistros>
+      <div class="text-center py-5 px-3">
+        <i class="bi bi-journal-medical display-4 text-muted"></i>
+        <h6 class="mt-3 text-secondary fw-bold">Sin atenciones registradas para este filtro</h6>
+        <p class="text-muted small" *ngIf="permitirRegistro">Use "Registrar Nueva Atención" para generar una nota clínica.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>
+
+<div class="modal fade show d-block" *ngIf="registroSeleccionadoDetalle" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header bg-primary text-white py-3 px-4 rounded-top-4">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-file-medical-fill me-2"></i> Detalle de Atención Médica: {{ registroSeleccionadoDetalle.id }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarDetalle()" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="text-muted small fw-semibold">Fecha y Hora de Atención</label>
+            <div class="fw-bold">{{ registroSeleccionadoDetalle.fechaAtencion | date:'fullDate' }} - {{ registroSeleccionadoDetalle.fechaAtencion | date:'shortTime' }}</div>
+          </div>
+          <div class="col-md-6">
+            <label class="text-muted small fw-semibold">Veterinario a Cargo</label>
+            <div class="fw-bold text-primary">{{ registroSeleccionadoDetalle.veterinarioNombre }}</div>
+          </div>
+
+          <div class="col-12"><hr class="my-1 text-muted" /></div>
+
+          <div class="col-12">
+            <label class="text-muted small fw-semibold">Anamnesis / Motivo de Consulta</label>
+            <p class="p-3 bg-light rounded-3 mb-0">{{ registroSeleccionadoDetalle.anamnesis }}</p>
+          </div>
+
+          <div class="col-12">
+            <label class="text-muted small fw-semibold">Diagnóstico Definitivo</label>
+            <div class="alert alert-info py-2 px-3 fw-semibold mb-0">
+              <i class="bi bi-check2-circle me-1"></i> {{ registroSeleccionadoDetalle.diagnostico }}
+            </div>
+          </div>
+
+          <div class="col-12">
+            <label class="text-muted small fw-semibold">Constantes Fisiológicas</label>
+            <div class="row g-2 text-center">
+              <div class="col-3">
+                <div class="p-2 border rounded-3 bg-light">
+                  <div class="text-muted small">Temperatura</div>
+                  <div class="fw-bold text-danger">{{ registroSeleccionadoDetalle.examenFisico.temperaturaCorporal }} °C</div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="p-2 border rounded-3 bg-light">
+                  <div class="text-muted small">Frecuencia C.</div>
+                  <div class="fw-bold text-primary">{{ registroSeleccionadoDetalle.examenFisico.frecuenciaCardiaca }} bpm</div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="p-2 border rounded-3 bg-light">
+                  <div class="text-muted small">Frecuencia R.</div>
+                  <div class="fw-bold text-success">{{ registroSeleccionadoDetalle.examenFisico.frecuenciaRespiratoria }} rpm</div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="p-2 border rounded-3 bg-light">
+                  <div class="text-muted small">Peso Registrado</div>
+                  <div class="fw-bold text-dark">{{ registroSeleccionadoDetalle.examenFisico.pesoKg }} kg</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12" *ngIf="registroSeleccionadoDetalle.tratamientos && registroSeleccionadoDetalle.tratamientos.length > 0">
+            <label class="text-muted small fw-semibold">Prescripción Médica y Posología</label>
+            <ul class="list-group list-group-flush border rounded-3">
+              <li class="list-group-item" *ngFor="let t of registroSeleccionadoDetalle.tratamientos">
+                <strong>{{ t.medicamento }}</strong> - Dosis: {{ t.dosisMg }}mg cada {{ t.frecuenciaHoras }}h durante {{ t.duracionDias }} días.
+                <div class="small text-muted">{{ t.instrucciones }}</div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="col-12">
+            <label class="text-muted small fw-semibold">Observaciones Clínicas / Pronóstico</label>
+            <p class="text-secondary small mb-0">{{ registroSeleccionadoDetalle.observaciones }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer bg-light py-2 px-4 rounded-bottom-4">
+        <button type="button" class="btn btn-secondary rounded-pill px-4" (click)="cerrarDetalle()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

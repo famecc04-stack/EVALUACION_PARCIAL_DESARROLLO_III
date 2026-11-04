@@ -1,0 +1,220 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1 text-dark">
+        <i class="bi bi-calendar3-range text-primary me-2"></i>
+        {{ esAgendaPersonal ? 'Mi Agenda de Atención' : 'Gestión de Citas y Turnos Clínicos' }}
+      </h2>
+      <p class="text-muted mb-0" *ngIf="esAgendaPersonal">
+        Citas asignadas a <strong>{{ nombreUsuario }}</strong>. Inicie y finalice las atenciones desde cada tarjeta.
+      </p>
+      <p class="text-muted mb-0" *ngIf="!esAgendaPersonal">
+        Agenda de todos los médicos: programe, reprograme o cancele citas y controle las urgencias.
+      </p>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <button
+        *appTienePermiso="'CITAS_AGENDAR'"
+        type="button"
+        class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2"
+        (click)="abrirModalAgendar()"
+      >
+        <i class="bi bi-plus-circle-fill fs-5"></i>
+        <span>Agendar Nueva Cita</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Indicadores: al hacer clic aplican el filtro correspondiente -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md">
+      <button type="button" class="kpi-card card border-0 shadow-sm rounded-4 bg-white p-3 border-start border-4 border-danger w-100 text-start"
+              (click)="aplicarFiltroRapido('PROGRAMADA', 'URGENCIA')" title="Ver urgencias pendientes">
+        <div class="d-flex align-items-center justify-content-between w-100">
+          <div>
+            <span class="text-muted small fw-semibold">Urgencias Pendientes</span>
+            <h3 class="fw-bold text-danger mb-0 mt-1">{{ totalUrgencias }}</h3>
+          </div>
+          <div class="bg-danger bg-opacity-10 p-3 rounded-circle text-danger">
+            <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+          </div>
+        </div>
+      </button>
+    </div>
+
+    <div class="col-12 col-md">
+      <button type="button" class="kpi-card card border-0 shadow-sm rounded-4 bg-white p-3 border-start border-4 border-warning w-100 text-start"
+              (click)="aplicarFiltroRapido('EN_ATENCION')" title="Ver pacientes en atención">
+        <div class="d-flex align-items-center justify-content-between w-100">
+          <div>
+            <span class="text-muted small fw-semibold">Pacientes en Atención</span>
+            <h3 class="fw-bold text-warning-emphasis mb-0 mt-1">{{ totalEnAtencion }}</h3>
+          </div>
+          <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning-emphasis">
+            <i class="bi bi-heart-pulse-fill fs-3"></i>
+          </div>
+        </div>
+      </button>
+    </div>
+
+    <div class="col-12 col-md">
+      <button type="button" class="kpi-card card border-0 shadow-sm rounded-4 bg-white p-3 border-start border-4 border-primary w-100 text-start"
+              (click)="aplicarFiltroRapido('PROGRAMADA')" title="Ver citas programadas">
+        <div class="d-flex align-items-center justify-content-between w-100">
+          <div>
+            <span class="text-muted small fw-semibold">Programadas en Espera</span>
+            <h3 class="fw-bold text-primary mb-0 mt-1">{{ totalProgramadas }}</h3>
+          </div>
+          <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+            <i class="bi bi-clock-history fs-3"></i>
+          </div>
+        </div>
+      </button>
+    </div>
+
+    <div class="col-12 col-md" *appTienePermiso="'REPORTES_VER'">
+      <div class="card border-0 shadow-sm rounded-4 bg-white p-3 border-start border-4 border-success h-100">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted small fw-semibold">Ingresos Estimados</span>
+            <h3 class="fw-bold text-success mb-0 mt-1">{{ ingresosEstimados | currency:'PEN':'S/ ':'1.0-0' }}</h3>
+          </div>
+          <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success">
+            <i class="bi bi-cash-coin fs-3"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white p-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-lg">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-light border-0 fw-semibold text-muted">Estado:</span>
+          <select class="form-select border-0 bg-light" [(ngModel)]="filtroEstado">
+            <option value="TODOS">Todos los Estados</option>
+            <option value="PROGRAMADA">Programadas</option>
+            <option value="EN_ATENCION">En Atención</option>
+            <option value="COMPLETADA">Completadas</option>
+            <option value="CANCELADA">Canceladas</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-light border-0 fw-semibold text-muted">Prioridad:</span>
+          <select class="form-select border-0 bg-light" [(ngModel)]="filtroPrioridad">
+            <option value="TODOS">Todas las Prioridades</option>
+            <option value="URGENCIA">Urgencia Crítica</option>
+            <option value="ALTA">Alta</option>
+            <option value="MEDIA">Media</option>
+            <option value="BAJA">Baja</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg" *ngIf="!esAgendaPersonal">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-light border-0 fw-semibold text-muted">Médico:</span>
+          <select class="form-select border-0 bg-light" [(ngModel)]="filtroVeterinario">
+            <option value="TODOS">Todos los Médicos</option>
+            <option *ngFor="let v of veterinarios" [value]="v.id">{{ v.nombreProfesional }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-auto d-flex align-items-center gap-2 justify-content-lg-end text-muted small">
+        <span>Mostrando <strong>{{ citasFiltradas.length }}</strong> de <strong>{{ citasVisibles.length }}</strong> citas</span>
+        <button *ngIf="hayFiltrosActivos" type="button" class="btn btn-link btn-sm text-decoration-none p-0 ms-2" (click)="limpiarFiltros()">
+          <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+        </button>
+      </div>
+    </div>
+    <div class="form-text mt-2">
+      <i class="bi bi-info-circle me-1"></i>
+      Los filtros actualizan el contador de cada día del calendario y la lista del día seleccionado.
+      Al activar uno, se muestran abajo todas las citas que lo cumplen, de cualquier fecha.
+    </div>
+  </div>
+
+  <!-- Resultados del filtro (todas las fechas) -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" *ngIf="hayFiltrosActivos">
+    <div class="card-header bg-white py-3 px-4 d-flex align-items-center justify-content-between">
+      <h6 class="fw-bold mb-0">
+        <i class="bi bi-funnel-fill text-primary me-2"></i>Resultados del filtro
+        <span class="badge bg-primary-subtle text-primary ms-2">{{ resultadosFiltro.length }}</span>
+      </h6>
+    </div>
+    <div class="table-responsive" *ngIf="resultadosFiltro.length > 0; else sinResultados">
+      <table class="table table-hover align-middle mb-0 small">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Fecha y hora</th>
+            <th>Paciente</th>
+            <th>Médico</th>
+            <th>Prioridad</th>
+            <th>Estado</th>
+            <th class="text-end pe-4"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of resultadosFiltro">
+            <td class="ps-4 text-nowrap">{{ c.fechaHora | date:'EEE dd/MM/yyyy, HH:mm' | titlecase }}</td>
+            <td class="fw-semibold">{{ c.mascotaNombre }}</td>
+            <td>{{ c.veterinarioNombre }}</td>
+            <td>{{ c.prioridad }}</td>
+            <td><span [class]="c.estado | estadoCita:'badge'">{{ c.estado | estadoCita:'texto' }}</span></td>
+            <td class="text-end pe-4">
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" (click)="irAFecha(c)">
+                Ver en calendario
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #sinResultados>
+      <div class="text-center text-muted small py-4">Ninguna cita cumple el filtro seleccionado.</div>
+    </ng-template>
+  </div>
+
+  <app-calendario-citas
+    [citas]="citasFiltradas"
+    [fechaSeleccionada]="fechaSeleccionada"
+    [acciones]="acciones"
+    (seleccionarFecha)="alSeleccionarFecha($event)"
+    (cambiarEstado)="alCambiarEstado($event)"
+    (verHistorialMascota)="navegarAHistorial($event)"
+  ></app-calendario-citas>
+</div>
+
+<div class="modal fade show d-block" *ngIf="modalAgendarAbierto" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header bg-primary text-white py-3 px-4 rounded-top-4">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-calendar-plus me-2"></i> Agendar Nueva Consulta Veterinaria
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModalAgendar()" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <app-formulario-cita
+          [mascotas]="mascotas"
+          [duenos]="duenos"
+          [veterinarios]="veterinarios"
+          [fechaSugerida]="fechaSeleccionada"
+          [horariosDisponibles]="horariosDisponibles"
+          [errorServidor]="errorCita"
+          (consultarDisponibilidad)="alConsultarDisponibilidad($event)"
+          (guardarCita)="procesarGuardarCita($event)"
+          (cancelar)="cerrarModalAgendar()"
+        ></app-formulario-cita>
+      </div>
+    </div>
+  </div>
+</div>

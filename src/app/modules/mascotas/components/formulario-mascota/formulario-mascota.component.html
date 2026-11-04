@@ -1,0 +1,298 @@
+<form [formGroup]="formulario" (ngSubmit)="emitirGuardado()" novalidate>
+  <div class="row g-4">
+    <div class="col-12 col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-header bg-primary bg-opacity-10 border-0 py-3 px-4 rounded-top-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="mb-0 text-primary fw-bold">
+              <i class="bi bi-person-badge-fill me-2"></i> Datos del Propietario
+            </h5>
+            <span class="badge bg-primary">Paso 1</span>
+          </div>
+        </div>
+
+        <div class="card-body p-4" formGroupName="dueno">
+          <div class="mb-3" *ngIf="duenosExistentes.length > 0">
+            <label class="form-label fw-semibold text-muted small">Seleccionar Dueño Frecuente (Opcional)</label>
+            <select class="form-select border-primary-subtle" (change)="onSeleccionarDuenoExistente($event)">
+              <option value="NUEVO">+ Registrar Nuevo Dueño</option>
+              <option *ngFor="let d of duenosExistentes" [value]="d.id">
+                {{ d.nombre }} {{ d.apellido }} (DNI: {{ d.documentoIdentidad }})
+              </option>
+            </select>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">Nombres *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="nombre"
+                placeholder="Ej. Juan Carlos"
+                [class.is-invalid]="formulario.get('dueno.nombre')?.invalid && formulario.get('dueno.nombre')?.touched"
+              />
+              <div class="invalid-feedback">Nombre requerido (mínimo 2 caracteres).</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">Apellidos *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="apellido"
+                placeholder="Ej. Pérez García"
+                [class.is-invalid]="formulario.get('dueno.apellido')?.invalid && formulario.get('dueno.apellido')?.touched"
+              />
+              <div class="invalid-feedback">Apellido requerido.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">DNI / Doc. Identidad *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="documentoIdentidad"
+                placeholder="8 dígitos numéricos"
+                maxlength="8"
+                [class.is-invalid]="formulario.get('dueno.documentoIdentidad')?.invalid && formulario.get('dueno.documentoIdentidad')?.touched"
+              />
+              <div class="invalid-feedback">DNI inválido (debe tener exactamente 8 dígitos).</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">Teléfono Móvil *</label>
+              <input
+                type="tel"
+                class="form-control"
+                formControlName="telefono"
+                placeholder="Ej. 987654321"
+                maxlength="9"
+                [class.is-invalid]="formulario.get('dueno.telefono')?.invalid && formulario.get('dueno.telefono')?.touched"
+              />
+              <div class="invalid-feedback">Teléfono inválido (debe iniciar con 9 y tener 9 dígitos).</div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small fw-semibold text-muted">Correo Electrónico *</label>
+              <input
+                type="email"
+                class="form-control"
+                formControlName="correoElectronico"
+                placeholder="correo@ejemplo.com"
+                [class.is-invalid]="formulario.get('dueno.correoElectronico')?.invalid && formulario.get('dueno.correoElectronico')?.touched"
+              />
+              <div class="invalid-feedback">Ingrese un correo electrónico válido.</div>
+            </div>
+
+            <div class="col-md-8">
+              <label class="form-label small fw-semibold text-muted">Dirección Domiciliaria *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="direccion"
+                placeholder="Av. Los Robles 123, Distrito"
+                [class.is-invalid]="formulario.get('dueno.direccion')?.invalid && formulario.get('dueno.direccion')?.touched"
+              />
+              <div class="invalid-feedback">Dirección requerida (mínimo 5 caracteres).</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small fw-semibold text-muted">Contacto Emergencia</label>
+              <input
+                type="tel"
+                class="form-control"
+                formControlName="contactoEmergencia"
+                placeholder="Tel. secundario"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-header bg-success bg-opacity-10 border-0 py-3 px-4 rounded-top-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="mb-0 text-success fw-bold">
+              <i class="bi bi-heart-pulse-fill me-2"></i> Datos de la Mascota
+            </h5>
+            <span class="badge bg-success">Paso 2</span>
+          </div>
+        </div>
+
+        <div class="card-body p-4" formGroupName="mascota">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">Nombre de la Mascota *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="nombre"
+                placeholder="Ej. Max, Luna, Toby"
+                [class.is-invalid]="formulario.get('mascota.nombre')?.invalid && formulario.get('mascota.nombre')?.touched"
+              />
+              <div class="invalid-feedback">Nombre requerido.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">Especie *</label>
+              <select class="form-select" formControlName="especie">
+                <option *ngFor="let esp of especiesDisponibles" [value]="esp">{{ esp }}</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">Raza *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="raza"
+                placeholder="Ej. Mestizo, Poodle, Siamés"
+                [class.is-invalid]="formulario.get('mascota.raza')?.invalid && formulario.get('mascota.raza')?.touched"
+              />
+              <div class="invalid-feedback">Raza requerida.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">Sexo *</label>
+              <div class="d-flex gap-3 mt-1">
+                <div class="form-check" *ngFor="let s of sexosDisponibles">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    [value]="s"
+                    formControlName="sexo"
+                    [id]="'sexo_' + s"
+                  />
+                  <label class="form-check-label small" [for]="'sexo_' + s">{{ s }}</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">Fecha de Nacimiento / Aprox. *</label>
+              <input
+                type="date"
+                class="form-control"
+                formControlName="fechaNacimiento"
+                [class.is-invalid]="formulario.get('mascota.fechaNacimiento')?.invalid && formulario.get('mascota.fechaNacimiento')?.touched"
+              />
+              <div class="invalid-feedback">Fecha requerida y no puede ser futura.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">Peso Actual (kg) *</label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  step="0.1"
+                  class="form-control"
+                  formControlName="pesoKg"
+                  placeholder="0.0"
+                  [class.is-invalid]="formulario.get('mascota.pesoKg')?.invalid && formulario.get('mascota.pesoKg')?.touched"
+                />
+                <span class="input-group-text">kg</span>
+              </div>
+              <div
+                *ngIf="formulario.get('mascota.pesoKg')?.invalid && formulario.get('mascota.pesoKg')?.touched"
+                class="text-danger small mt-1"
+              >
+                Peso obligatorio y mayor a 0 kg.
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">N° de Microchip (Opcional)</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="microchip"
+                placeholder="Ej. CHIP-982000123"
+              />
+            </div>
+
+            <div class="col-md-6 d-flex align-items-center">
+              <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" id="switchEsterilizado" formControlName="esterilizado" />
+                <label class="form-check-label fw-semibold small" for="switchEsterilizado">
+                  Paciente Esterilizado
+                </label>
+              </div>
+            </div>
+
+            <div class="col-12 mt-3">
+              <label class="form-label small fw-semibold text-muted">Alergias Conocidas</label>
+              <div class="input-group mb-2">
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="nuevaAlergia"
+                  [ngModelOptions]="{standalone: true}"
+                  placeholder="Ej. Penicilina, Picadura de pulga"
+                  (keyup.enter)="agregarAlergia()"
+                />
+                <button type="button" class="btn btn-outline-secondary" (click)="agregarAlergia()">
+                  <i class="bi bi-plus-lg"></i> Agregar
+                </button>
+              </div>
+              <div class="d-flex flex-wrap gap-1">
+                <span *ngFor="let al of listaAlergias; let i = index" class="badge bg-danger-subtle text-danger border border-danger p-2">
+                  {{ al }}
+                  <i class="bi bi-x-circle ms-1 cursor-pointer" (click)="removerAlergia(i)"></i>
+                </span>
+                <span *ngIf="listaAlergias.length === 0" class="text-muted small fst-italic">Sin alergias declaradas.</span>
+              </div>
+            </div>
+
+            <div class="col-12 mt-2">
+              <label class="form-label small fw-semibold text-muted">Condiciones Preexistentes</label>
+              <div class="input-group mb-2">
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="nuevaCondicion"
+                  [ngModelOptions]="{standalone: true}"
+                  placeholder="Ej. Cardiopatía, Displasia, Soplo"
+                  (keyup.enter)="agregarCondicion()"
+                />
+                <button type="button" class="btn btn-outline-secondary" (click)="agregarCondicion()">
+                  <i class="bi bi-plus-lg"></i> Agregar
+                </button>
+              </div>
+              <div class="d-flex flex-wrap gap-1">
+                <span *ngFor="let cond of listaCondiciones; let i = index" class="badge bg-warning-subtle text-dark border border-warning p-2">
+                  {{ cond }}
+                  <i class="bi bi-x-circle ms-1 cursor-pointer" (click)="removerCondicion(i)"></i>
+                </span>
+                <span *ngIf="listaCondiciones.length === 0" class="text-muted small fst-italic">Sin condiciones preexistentes.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="d-flex justify-content-end gap-3 p-3 bg-white rounded-4 shadow-sm">
+        <button
+          type="button"
+          class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold"
+          (click)="emitirCancelacion()"
+        >
+          <i class="bi bi-x-lg me-1"></i> Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary px-5 py-2 rounded-pill fw-semibold shadow-sm d-flex align-items-center gap-2"
+          [disabled]="enviando"
+        >
+          <span *ngIf="enviando" class="spinner-border spinner-border-sm" role="status"></span>
+          <i *ngIf="!enviando" class="bi bi-check2-circle fs-5"></i>
+          <span>Registrar Paciente y Propietario</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</form>

@@ -1,0 +1,63 @@
+<div
+  class="card h-100 border-0 shadow-sm rounded-4 mascota-card cursor-pointer"
+  [class.border-primary]="seleccionada"
+  [class.shadow-md]="seleccionada"
+  (click)="onSeleccionar()"
+>
+  <div class="card-body p-4">
+    <div class="d-flex align-items-start justify-content-between mb-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="avatar-mascota rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center">
+          <i class="fs-3" [class]="mascota.especie | especieBadge:'icono'"></i>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-0 text-dark">{{ mascota.nombre }}</h5>
+          <span class="text-muted small">{{ mascota.raza }}</span>
+        </div>
+      </div>
+      <span [class]="mascota.especie | especieBadge:'badge'">
+        {{ mascota.especie }}
+      </span>
+    </div>
+
+    <div class="small text-muted mb-3">
+      <div class="d-flex justify-content-between mb-1">
+        <span>Edad / Tiempo:</span>
+        <strong class="text-dark">{{ mascota.calcularEdad().texto }}</strong>
+      </div>
+      <div class="d-flex justify-content-between mb-1">
+        <span>Peso Registrado:</span>
+        <strong class="text-dark">{{ mascota.pesoKg }} kg</strong>
+      </div>
+      <div class="d-flex justify-content-between mb-1">
+        <span>Sexo:</span>
+        <strong class="text-dark">{{ mascota.sexo }}</strong>
+      </div>
+      <div class="d-flex justify-content-between">
+        <span>Riesgo Anestésico:</span>
+        <span
+          class="badge"
+          [ngClass]="{
+            'bg-success': mascota.clasificarRiesgoAnestesico() === 'BAJO',
+            'bg-info text-dark': mascota.clasificarRiesgoAnestesico() === 'MODERADO',
+            'bg-warning text-dark': mascota.clasificarRiesgoAnestesico() === 'ALTO',
+            'bg-danger': mascota.clasificarRiesgoAnestesico() === 'CRITICO'
+          }"
+        >
+          {{ mascota.clasificarRiesgoAnestesico() }}
+        </span>
+      </div>
+    </div>
+
+    <div class="border-top pt-2 mt-2" *ngIf="dueno">
+      <div class="d-flex align-items-center gap-2 small text-secondary">
+        <i class="bi bi-person text-primary"></i>
+        <span>Dueño: <strong>{{ dueno.nombreCompleto }}</strong></span>
+      </div>
+      <div class="d-flex align-items-center gap-2 small text-secondary">
+        <i class="bi bi-telephone text-primary"></i>
+        <span>{{ dueno.telefono }}</span>
+      </div>
+    </div>
+  </div>
+</div>

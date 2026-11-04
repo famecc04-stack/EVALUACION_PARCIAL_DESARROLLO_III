@@ -1,0 +1,107 @@
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm py-2">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" routerLink="/citas">
+        <i class="bi bi-hospital fs-4 text-white"></i>
+        <span>VETCLINIC <span class="badge bg-warning text-dark fs-7 align-middle ms-1">PRO</span></span>
+      </a>
+
+      <button
+        class="navbar-toggler border-0"
+        type="button"
+        (click)="alternarMenu()"
+        aria-controls="navegacionPrincipal"
+        [attr.aria-expanded]="!menuColapsado"
+        aria-label="Alternar navegación"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" [class.show]="!menuColapsado" id="navegacionPrincipal">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-lg-1">
+          <li class="nav-item">
+            <a
+              class="nav-link px-3 rounded-pill d-flex align-items-center gap-2"
+              routerLink="/citas"
+              routerLinkActive="active bg-white text-primary fw-semibold shadow-sm"
+              (click)="cerrarMenu()"
+            >
+              <i class="bi bi-calendar3"></i>
+              <span>{{ (usuario$ | async)?.rol === 'VETERINARIO' ? 'Mi Agenda' : 'Agenda de Citas' }}</span>
+            </a>
+          </li>
+          <li class="nav-item" *appTienePermiso="'MASCOTAS_REGISTRAR'">
+            <a
+              class="nav-link px-3 rounded-pill d-flex align-items-center gap-2"
+              routerLink="/mascotas/registro"
+              routerLinkActive="active bg-white text-primary fw-semibold shadow-sm"
+              (click)="cerrarMenu()"
+            >
+              <i class="bi bi-person-plus-fill"></i>
+              <span>Registrar Paciente</span>
+            </a>
+          </li>
+          <li class="nav-item" *appTienePermiso="'HISTORIAL_VER'">
+            <a
+              class="nav-link px-3 rounded-pill d-flex align-items-center gap-2"
+              routerLink="/mascotas/historial"
+              routerLinkActive="active bg-white text-primary fw-semibold shadow-sm"
+              (click)="cerrarMenu()"
+            >
+              <i class="bi bi-clipboard2-pulse-fill"></i>
+              <span>Historial Clínico</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-3" *ngIf="usuario$ | async as usuario; else loginBoton">
+          <div class="text-white text-end d-none d-md-block">
+            <div class="fw-semibold small lh-1">{{ usuario.nombre }}</div>
+            <span class="badge bg-light text-primary mt-1 py-0 px-2 fs-8">{{ descripcionRol[usuario.rol] }}</span>
+          </div>
+          <button
+            type="button"
+            class="btn btn-outline-light btn-sm rounded-pill px-3 d-flex align-items-center gap-2"
+            (click)="cerrarSesion()"
+          >
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Salir</span>
+          </button>
+        </div>
+
+        <ng-template #loginBoton>
+          <a routerLink="/auth/login" class="btn btn-warning btn-sm rounded-pill px-3 fw-semibold">
+            <i class="bi bi-door-open me-1"></i> Acceder
+          </a>
+        </ng-template>
+      </div>
+    </div>
+  </nav>
+
+  <div class="position-fixed top-0 end-0 p-3 notificaciones-container" style="z-index: 1080;">
+    <div
+      *ngFor="let notif of notificaciones$ | async"
+      class="alert alert-{{ notif.tipo }} alert-dismissible fade show shadow-lg border-0 mb-2"
+      role="alert"
+    >
+      <div class="d-flex align-items-center gap-2">
+        <i
+          class="bi"
+          [ngClass]="{
+            'bi-check-circle-fill': notif.tipo === 'success',
+            'bi-exclamation-triangle-fill': notif.tipo === 'warning',
+            'bi-x-octagon-fill': notif.tipo === 'danger',
+            'bi-info-circle-fill': notif.tipo === 'info'
+          }"
+        ></i>
+        <div>{{ notif.mensaje }}</div>
+        <button
+          type="button"
+          class="btn-close ms-auto"
+          aria-label="Cerrar"
+          (click)="descartarNotificacion(notif.id)"
+        ></button>
+      </div>
+    </div>
+  </div>
+</header>

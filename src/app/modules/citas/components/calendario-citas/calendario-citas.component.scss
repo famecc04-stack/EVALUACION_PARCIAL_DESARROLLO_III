@@ -1,0 +1,26 @@
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+.dia-tarjeta {
+  min-height: 95px;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.dia-activo {
+  background-color: #e7f1ff !important;
+  border-width: 2px !important;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+}
+
+.dia-hoy {
+  border-bottom: 3px solid #ffc107 !important;
+}
